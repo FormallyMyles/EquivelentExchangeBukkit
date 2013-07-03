@@ -1,4 +1,4 @@
-<project name="PerWorldPlugins" default="dist" basedir=".">
+<project name="EquivelentExchangeBukkit" default="dist" basedir=".">
 	<property name="pluginname" value="EEB"/>
 	<property name="path" location="lib"/>
 	<property name="plugins" location=""/>
