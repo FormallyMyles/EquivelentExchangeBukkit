@@ -2,7 +2,9 @@ package us.Myles.EE;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -34,6 +36,7 @@ public class EE3 extends JavaPlugin implements Listener{
     public static Permission workbenchPermission = new Permission("eeb.workbench",PermissionDefault.TRUE);
     public static Permission wildcardPermission = new Permission("eeb.output.*",PermissionDefault.FALSE);
     public static Permission wildcard2Permission = new Permission("eeb.*",PermissionDefault.FALSE);
+    public ConcurrentHashMap<String, Boolean> currentCrafting = new ConcurrentHashMap<String, Boolean>();
     
 	public void onEnable(){
 		ItemMeta itemMeta = Stone.getItemMeta();
@@ -150,6 +153,10 @@ public class EE3 extends JavaPlugin implements Listener{
 	@EventHandler
 	public void craftEvent(final CraftItemEvent event){
 		if(event.getRecipe() instanceof ShapelessRecipe){
+			if(currentCrafting.containsKey(event.getViewers().get(0).getName())){
+				event.setCancelled(true);
+				return;
+			}
 			ShapelessRecipe sr = (ShapelessRecipe) event.getRecipe();
 			if(sr.getResult().isSimilar(Stone)){
 				if(!event.getViewers().get(0).hasPermission(craftPermission) && !event.getViewers().get(0).hasPermission(wildcard2Permission)){
@@ -179,15 +186,10 @@ public class EE3 extends JavaPlugin implements Listener{
 			if(slot == -1){
 				event.setCancelled(true); return;
 			}
-			new Thread(){
+			currentCrafting.put(event.getViewers().get(0).getName(), true);
+			Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
 				public void run(){
-					while(event.getView().getItem(slot_data).equals(MyStone)){}
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					
 					ItemStack stone = createStone(MyStone);
 					if(stone == null){
 						for(HumanEntity h:event.getViewers()){
@@ -195,9 +197,12 @@ public class EE3 extends JavaPlugin implements Listener{
 							p.playSound(p.getLocation(), Sound.ITEM_BREAK, 1,1);
 						}
 					}
-					event.getView().setItem(slot_data, stone);
+					if(event.getView().getItem(slot_data) != null){
+						event.getView().setItem(slot_data, stone);
+					}
+					currentCrafting.remove(event.getViewers().get(0).getName());
 				}
-			}.start();
+			}, 2L);
 			
 		}
 		
@@ -207,7 +212,13 @@ public class EE3 extends JavaPlugin implements Listener{
 		return dynamicPerms.get(name);
 	}
 	private ItemStack createStone(ItemStack myStone) {
+		if(myStone == null){
+			return null;
+		}
 		ItemMeta im = myStone.getItemMeta();
+		if(im == null){
+			return null;
+		}
 		int n = Integer.parseInt(im.getLore().get(0).split("/")[0]) - 1;
 		im.setLore(Arrays.asList(new String[]{n + "/1521 Uses Left"}));
 		myStone.setItemMeta(im);
