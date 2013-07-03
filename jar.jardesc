@@ -13,7 +13,7 @@
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
         <file path="/EquivelentExchangeBukkit/plugin.yml"/>
         <javaElement handleIdentifier="=EquivelentExchangeBukkit/src"/>
-        <file path="/EquivelentExchangeBukkit/.project"/>
         <file path="/EquivelentExchangeBukkit/.classpath"/>
+        <file path="/EquivelentExchangeBukkit/.project"/>
     </selectedElements>
 </jardesc>
